@@ -8,44 +8,13 @@ const processResponse = async (response) => {
   return response.json();
 };
 
-// Action async untuk fetch artikel
-export const fetchArticles = createAsyncThunk(
-  "globalData/fetchArticles",
-  async (_, { rejectWithValue }) => {
-    const apiKey = "6nGpHi9ZrBPkfK4dJdr6FiqUXlMAJJ9d"; // API key baru
-    try {
-      const response = await fetch(
-        `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=peace&api-key=${apiKey}`
-      );
-      const data = await processResponse(response);
-
-      return data.response.docs
-        .filter(
-          (article) => article.multimedia && article.multimedia.length > 0
-        )
-        .slice(0, 6)
-        .map((article) => ({
-          title: article.headline?.main || "No Title",
-          description: article.abstract || "No description available.",
-          url: article.web_url,
-          imageUrl: article.multimedia[0]?.url
-            ? `https://www.nytimes.com/${article.multimedia[0]?.url}`
-            : null,
-        }));
-    } catch (error) {
-      console.error("Error fetching articles:", error);
-      return rejectWithValue(error.message || "Failed to fetch articles.");
-    }
-  }
-);
-
 // Action async untuk fetch countries
 export const fetchCountries = createAsyncThunk(
   "globalData/fetchCountries",
   async (_, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        "https://restcountries.com/v3.1/all?fields=name,capital,population,region,flags" // Endpoint baru
+        "https://restcountries.com/v3.1/all?fields=name,capital,population,region,flags"
       );
       const data = await processResponse(response);
 
@@ -69,7 +38,7 @@ export const fetchCountryData = createAsyncThunk(
   async (countryName, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `https://restcountries.com/v3.1/all?fields=name,capital,population,region,flags'/${countryName}`
+        `https://restcountries.com/v3.1/name/${countryName}`
       );
       const data = await processResponse(response);
 
@@ -85,20 +54,22 @@ export const fetchCountryData = createAsyncThunk(
 export const fetchNews = createAsyncThunk(
   "globalData/fetchNews",
   async (_, { rejectWithValue }) => {
-    const apiKey = "6nGpHi9ZrBPkfK4dJdr6FiqUXlMAJJ9d"; // API key baru
+    const apiKey = "4e99fb884147420481e0184a8e301d62"; // Ganti dengan API key Anda
     try {
       const response = await fetch(
-        `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`
+        `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=peace&api-key=${apiKey}`
       );
       const data = await processResponse(response);
 
-      return data.articles.slice(0, 10).map((article) => ({
-        title: article.title || "No Title",
-        description: article.description || "No description available.",
-        url: article.url,
-        imageUrl: article.urlToImage || null,
-        publishedAt: article.publishedAt,
-        source: article.source.name,
+      return data.response.docs.slice(0, 10).map((article) => ({
+        title: article.headline.main || "No Title",
+        description: article.abstract || "No description available.",
+        url: article.web_url,
+        imageUrl: article.multimedia[0]?.url
+          ? `https://www.nytimes.com/${article.multimedia[0].url}`
+          : null,
+        publishedAt: article.pub_date,
+        source: "The New York Times",
       }));
     } catch (error) {
       console.error("Error fetching news:", error);
@@ -111,19 +82,16 @@ export const fetchNews = createAsyncThunk(
 const globalDataSlice = createSlice({
   name: "globalData",
   initialState: {
-    articles: [],
     countries: [],
     news: [],
     country1: null,
     country2: null,
     isLoading: {
-      articles: false,
       countries: false,
       news: false,
       countryComparison: false,
     },
     error: {
-      articles: null,
       countries: null,
       news: null,
       countryComparison: null,
@@ -157,16 +125,6 @@ const globalDataSlice = createSlice({
     };
 
     builder
-      .addCase(fetchArticles.pending, (state) =>
-        handlePending(state, "articles")
-      )
-      .addCase(fetchArticles.fulfilled, (state, action) =>
-        handleFulfilled(state, "articles", action.payload)
-      )
-      .addCase(fetchArticles.rejected, (state, action) =>
-        handleRejected(state, "articles", action)
-      )
-
       .addCase(fetchCountries.pending, (state) =>
         handlePending(state, "countries")
       )
