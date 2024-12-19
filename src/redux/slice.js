@@ -69,7 +69,7 @@ export const fetchCountryData = createAsyncThunk(
   async (countryName, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        `https://restcountries.com/v3.1/name/${countryName}`
+        `https://restcountries.com/v3.1/all?fields=name,capital,population,region,flags'/${countryName}`
       );
       const data = await processResponse(response);
 
