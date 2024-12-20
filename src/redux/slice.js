@@ -50,24 +50,27 @@ export const fetchCountryData = createAsyncThunk(
   }
 );
 
-// Action async untuk fetch news
+// Action async untuk fetch news dari New York Times
 export const fetchNews = createAsyncThunk(
   "globalData/fetchNews",
   async (_, { rejectWithValue }) => {
-    const apiKey = "4e99fb884147420481e0184a8e301d62"; // API key baru
+    const apiKey = "6nGpHi9ZrBPkfK4dJdr6FiqUXlMAJJ9d"; // Ganti dengan API key dari developer.nytimes.com
     try {
       const response = await fetch(
-        `https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`
+        `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=peace&api-key=${apiKey}`
       );
       const data = await processResponse(response);
 
-      return data.articles.slice(0, 10).map((article) => ({
-        title: article.title || "No Title",
-        description: article.description || "No description available.",
-        url: article.url,
-        imageUrl: article.urlToImage || null,
-        publishedAt: article.publishedAt,
-        source: article.source.name,
+      return data.response.docs.slice(0, 10).map((article) => ({
+        title: article.headline.main || "No Title",
+        description: article.abstract || "No description available.",
+        url: article.web_url,
+        imageUrl:
+          article.multimedia?.length > 0 && article.multimedia[0]?.url
+            ? `https://www.nytimes.com/${article.multimedia[0].url}`
+            : null,
+        publishedAt: article.pub_date,
+        source: "The New York Times",
       }));
     } catch (error) {
       console.error("Error fetching news:", error);
