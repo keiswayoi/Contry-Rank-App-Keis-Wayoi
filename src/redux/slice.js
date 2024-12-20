@@ -14,7 +14,7 @@ export const fetchCountries = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        "https://restcountries.com/v3.1/all?fields=name,capital,population,region,flags"
+        "https://restcountries.com/v3.1/all?fields=name,capital,population,region,flags,cca2,latlng"
       );
       const data = await processResponse(response);
 
@@ -24,6 +24,8 @@ export const fetchCountries = createAsyncThunk(
         population: country.population,
         region: country.region,
         flag: country.flags?.png || null,
+        code: country.cca2 || "N/A",
+        latlng: country.latlng || null, // Tambahkan latlng untuk koordinat peta
       }));
     } catch (error) {
       console.error("Error fetching countries:", error);
@@ -53,11 +55,11 @@ export const fetchCountryData = createAsyncThunk(
 // Action async untuk fetch news dari New York Times
 export const fetchNews = createAsyncThunk(
   "globalData/fetchNews",
-  async (_, { rejectWithValue }) => {
+  async (searchTerm = "", { rejectWithValue }) => {
     const apiKey = "6nGpHi9ZrBPkfK4dJdr6FiqUXlMAJJ9d"; // Ganti dengan API key dari developer.nytimes.com
     try {
       const response = await fetch(
-        `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=peace&api-key=${apiKey}`
+        `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${searchTerm}&api-key=${apiKey}`
       );
       const data = await processResponse(response);
 

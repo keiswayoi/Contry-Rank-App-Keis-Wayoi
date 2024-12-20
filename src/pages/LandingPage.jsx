@@ -1,8 +1,14 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCountries, resetError } from "../redux/slice";
+import {
+  getCountries,
+  getIsLoadingCountries,
+  getErrorCountries,
+} from "../redux/selectors";
 import { createSelector } from "reselect";
 import { useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css"; // Pastikan untuk mengimpor Bootstrap CSS
 
 function LandingPage() {
   const dispatch = useDispatch();
@@ -14,11 +20,9 @@ function LandingPage() {
     [...countries].sort((a, b) => b.population - a.population)
   );
 
-  const { countries, isLoading, error } = useSelector((state) => ({
-    countries: selectSortedCountries(state),
-    isLoading: state.globalData.isLoading.countries,
-    error: state.globalData.error.countries,
-  }));
+  const countries = useSelector((state) => selectSortedCountries(state));
+  const isLoading = useSelector(getIsLoadingCountries);
+  const error = useSelector(getErrorCountries);
 
   useEffect(() => {
     dispatch(fetchCountries());
@@ -113,7 +117,7 @@ function LandingPage() {
                     />
                   </td>
                   <td>{country.name}</td>
-                  <td>{country.code}</td>
+                  <td>{country.cca2 || "N/A"}</td>
                   <td>{formatPopulation(country.population)}</td>
                 </tr>
               ))}
